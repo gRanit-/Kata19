@@ -13,8 +13,7 @@ public class Kata19SolutionImpl implements Kata19Solution {
     public Result findShortestWordChain(Node beginNode, Node endNode) {
         logger.info("Searching graph...");
 
-
-        if (beginNode == null || endNode == null || beginNode.getValue().length() != endNode.getValue().length())
+        if (areNullOrHaveDifferentLengths(beginNode, endNode))
             return Result.NOT_FOUND;
 
         List<Node> queue = new ArrayList<>();
@@ -61,6 +60,12 @@ public class Kata19SolutionImpl implements Kata19Solution {
         }
         Collections.reverse(path);
         return path;
+    }
+
+
+    private boolean areNullOrHaveDifferentLengths(Node beginNode, Node endNode) {
+        return beginNode == null || endNode == null || beginNode.getValue().length() != endNode.getValue().length();
+
     }
 
 }

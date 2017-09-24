@@ -11,13 +11,14 @@ import static java.util.Collections.EMPTY_MAP;
  * Created by wojciechgranicki on 24.09.2017.
  */
 public class FileBasedGraphInitializer implements GraphInitializer {
-    static final Logger logger = Logger.getLogger(FileBasedGraphInitializer.class.getName());
-    private Map<Integer, Set<String>> wordsByItsSize = new HashMap<>();
+    private static final Logger logger = Logger.getLogger(FileBasedGraphInitializer.class.getName());
+    private Map<Integer, Set<String>> wordsGroupedByLength = new HashMap<>();
     private Map<String, Node> nodes = new HashMap<>();
     private List<Character> alphabet;
 
+
     FileBasedGraphInitializer() {
-        alphabet = new ArrayList<>();
+        alphabet = new LinkedList<>();
         for (char i = 'a'; i <= 'z'; i++)
             alphabet.add(i);
         for (char i = 'A'; i <= 'Z'; i++)
@@ -33,73 +34,70 @@ public class FileBasedGraphInitializer implements GraphInitializer {
 
             while (scanner.hasNext()) {
                 String word = scanner.next();
-                Set<String> words = wordsByItsSize.get(word.length());
+                Set<String> words = wordsGroupedByLength.get(word.length());
                 if (words == null) {
                     words = new HashSet<>();
-                    wordsByItsSize.put(word.length(), words);
+                    wordsGroupedByLength.put(word.length(), words);
                 }
-                //  nodes.put(word, new Node(word));
-
                 words.add(word);
             }
         }
         logger.info("Done.");
-        return wordsByItsSize;
+        return wordsGroupedByLength;
     }
 
-    public Map<Integer, Set<String>> getWordsByItsSize() {
-        return wordsByItsSize;
+    public Map<Integer, Set<String>> getWordsGroupedByLength() {
+        return wordsGroupedByLength;
     }
 
     @Override
     public Map<String, Node> createGraph() {
-        if (wordsByItsSize == null || wordsByItsSize.isEmpty())
+        if (wordsGroupedByLength == null || wordsGroupedByLength.isEmpty())
             return EMPTY_MAP;
 
         logger.info("Creating graph...");
-        for (Map.Entry<Integer, Set<String>> neighbors : wordsByItsSize.entrySet()) {
-            Set<String> possibleNeighbors = neighbors.getValue();
-            for (String word : possibleNeighbors) {
+        for (Map.Entry<Integer, Set<String>> neighbors : wordsGroupedByLength.entrySet()) {
+            Set<String> sameLengthWords = neighbors.getValue();
+            for (String word : sameLengthWords)
+                connectNeighbors(putIfAbsent(word), sameLengthWords);
 
-                Node node = nodes.get(word);
-                if (node == null) {
-                    node = new Node(word);
-                    nodes.put(word, node);
-                }
-
-                connectNeighbors(node, possibleNeighbors);
-            }
         }
         logger.info("Done.");
         return nodes;
     }
 
-    private void connectNeighbors(Node node, Set<String> possibleNeighbors) {
+    private Node putIfAbsent(String word) {
+        Node node = nodes.get(word);
+        if (node == null) {
+            node = new Node(word);
+            nodes.put(word, node);
+        }
+        return node;
+    }
+
+    private void connectNeighbors(Node node, Set<String> sameLengthWords) {
         int wordLen = node.getValue().length();
+        int allPossibleNeighbors = alphabet.size() * wordLen;
         String word = node.getValue();
-        if (possibleNeighbors.size() > alphabet.size() * wordLen)
+        if (sameLengthWords.size() > allPossibleNeighbors)
             for (Character c : alphabet)
                 for (int i = 0; i < wordLen; i++) {
-                    String possibleN = substituteCharacterAtIndex(word, c, i);
-                    if (possibleNeighbors.contains(possibleN))
-                        addNeighbour(node, possibleN);
+                    String possibleNeighbor = substituteCharacterAtIndex(word, c, i);
+                    if (sameLengthWords.contains(possibleNeighbor))
+                        addNeighbor(node, possibleNeighbor);
                 }
         else
-            possibleNeighbors.stream()
+            sameLengthWords.stream()
                     .filter(possibleNeighbor -> areNeighbors(word, possibleNeighbor))
-                    .forEach(possibleNeighbor -> addNeighbour(node, possibleNeighbor));
+                    .forEach(possibleNeighbor -> addNeighbor(node, possibleNeighbor));
     }
 
     private String substituteCharacterAtIndex(String word, Character c, int i) {
         return word.substring(0, i) + c + word.substring(i + 1, word.length());
     }
 
-    private void addNeighbour(Node node, String neighborWord) {
-        Node neighbor = nodes.get(neighborWord);
-        if (neighbor == null) {
-            neighbor = new Node(neighborWord);
-            nodes.put(neighborWord, neighbor);
-        }
+    private void addNeighbor(Node node, String neighborWord) {
+        Node neighbor = putIfAbsent(neighborWord);
         node.addNeighbour(neighbor);
 
     }

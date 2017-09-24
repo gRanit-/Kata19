@@ -4,6 +4,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.*;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static org.junit.Assert.assertEquals;
