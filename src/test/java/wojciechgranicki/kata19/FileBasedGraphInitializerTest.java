@@ -21,19 +21,23 @@ public class FileBasedGraphInitializerTest {
 
     @Test
     public void loadDictionary() throws Exception {
-        Map<Integer, Set<String>> wordsBySize = graphInitializer.loadDictionary("/wordlist.txt");
+        Map<Integer, Set<String>> wordsBySize = graphInitializer.loadDictionary("/smallWordList.txt");
 
         int wordCount = wordsBySize.entrySet().stream()
-                .map(e -> e.getKey() * e.getValue().size())
+                .map(e -> e.getValue().size())
                 .reduce((x, y) -> x + y)
                 .orElse(0);
 
-        assertEquals(338882, wordCount);
+        assertEquals(17, wordCount);
+
+        for (Map.Entry<Integer, Set<String>> e : wordsBySize.entrySet())
+            for (String word : e.getValue())
+                assertEquals(e.getKey(), (Integer) word.length());
     }
 
     @Test
     public void createGraph() throws Exception {
-
+        graphInitializer.createGraph();
     }
 
 }

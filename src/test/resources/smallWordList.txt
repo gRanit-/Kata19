@@ -8,6 +8,9 @@ robs
 rods
 rode
 code
+rude
+robe
+rube
 cat
 cot
 cog

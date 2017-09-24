@@ -1,13 +1,13 @@
 package wojciechgranicki.kata19;
 
+import java.util.Collections;
 import java.util.List;
-
-import static wojciechgranicki.kata19.Kata19Solution.NOT_FOUND;
 
 /**
  * Created by wojciechgranicki on 24.09.2017.
  */
 public class Result {
+    public static final Result NOT_FOUND = new Result(Collections.emptyList());
 
     private int distance;
     private List<Node> path;
@@ -20,7 +20,7 @@ public class Result {
     public String pathToString() {
         return path.stream()
                 .map(Node::getValue)
-                .reduce((x, y) -> y + "->" + x).orElse(NOT_FOUND);
+                .reduce((x, y) -> x + "->" + y).orElse(Kata19Solution.NOT_FOUND);
     }
 
     public int getDistance() {

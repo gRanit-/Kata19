@@ -1,14 +1,14 @@
 package wojciechgranicki.kata19;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created by wojciechgranicki on 24.09.2017.
  */
 class Node implements Comparable<Node> {
     private String value;
-    private List<Node> neighbors = new ArrayList<>();
+    private Set<Node> neighbors = new HashSet<>();
 
     public Node(String value) {
         this.value = value;
@@ -18,16 +18,20 @@ class Node implements Comparable<Node> {
         neighbors.add(neighbor);
     }
 
-    public List<Node> getNeighbors() {
+    public Set<Node> getNeighbors() {
         return neighbors;
     }
 
-    public void setNeighbors(List<Node> neighbors) {
+    public void setNeighbors(Set<Node> neighbors) {
         this.neighbors = neighbors;
     }
 
     public String getValue() {
         return value;
+    }
+
+    public boolean hasNeighbor(Node node) {
+        return neighbors.contains(node);
     }
 
     @Override
@@ -51,5 +55,10 @@ class Node implements Comparable<Node> {
         return this.value.compareTo(o.value);
     }
 
-
+    @Override
+    public String toString() {
+        return "Node{" +
+                "value='" + value + '\'' +
+                '}';
+    }
 }
