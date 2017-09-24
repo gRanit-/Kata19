@@ -11,9 +11,9 @@ import java.util.logging.Logger;
 public class Kata19SolutionImpl implements Kata19Solution {
     static final Logger logger = Logger.getLogger(Kata19SolutionImpl.class.getName());
 
-    Map<Integer, SortedSet<String>> wordsByItsSize = new HashMap<>();
+    Map<Integer, Set<String>> wordsByItsSize = new HashMap<>();
     Map<String, Node> nodes = new HashMap<>();
-    final List<Character> alphabet;
+    List<Character> alphabet;
 
     Kata19SolutionImpl() {
         alphabet = new ArrayList<>();
@@ -29,19 +29,19 @@ public class Kata19SolutionImpl implements Kata19Solution {
         // words.
         logger.info("Loading dictionary...");
         InputStream stream = (Kata19SolutionImpl.class.getResourceAsStream(filePath));
-        int i = 0;
+
         try (Scanner scanner = new Scanner(stream)) {
 
             while (scanner.hasNext()) {
                 String word = scanner.next();
-                SortedSet<String> words = wordsByItsSize.get(word.length());
+                Set<String> words = wordsByItsSize.get(word.length());
                 if (words == null) {
-                    words = new TreeSet<>();
+                    words = new HashSet<>();
                     wordsByItsSize.put(word.length(), words);
                 }
                 words.add(word);
                 nodes.put(word, new Node(word));
-                i++;
+
             }
         }
 
@@ -54,25 +54,29 @@ public class Kata19SolutionImpl implements Kata19Solution {
     }
 
     private void createGraph() {
-        for (Map.Entry<Integer, SortedSet<String>> neighbors : wordsByItsSize.entrySet()) {
-            for (String word : neighbors.getValue()) {
+        for (Map.Entry<Integer, Set<String>> neighbors : wordsByItsSize.entrySet()) {
+            Set<String> neighborSet = neighbors.getValue();
+            for (String word : neighborSet) {
                 Node node = nodes.get(word);
-                if (neighbors.getValue().size() > alphabet.size() * word.length())
+                if (neighborSet.size() > alphabet.size() * word.length())
                     for (Character c : alphabet)
                         for (int i = 0; i < word.length(); i++) {
-                            String possibleN = word.substring(0, i) + c + word.substring(i + 1, word.length());
-                            if (neighbors.getValue().contains(possibleN))
+                            String possibleN = substituteCharacterAtIndex(word, c, i);
+                            if (neighborSet.contains(possibleN))
                                 addNeighbour(node, possibleN);
                         }
-                else {
+                else
                     neighbors.getValue().stream()
                             .filter(possibleNeighbor -> areNeighbors(word, possibleNeighbor))
                             .forEach(possibleNeighbor -> addNeighbour(node, possibleNeighbor));
 
-                }
 
             }
         }
+    }
+
+    private String substituteCharacterAtIndex(String word, Character c, int i) {
+        return word.substring(0, i) + c + word.substring(i + 1, word.length());
     }
 
     private void addNeighbour(Node node, String word) {
@@ -95,14 +99,14 @@ public class Kata19SolutionImpl implements Kata19Solution {
         return count == 1;
     }
 
-    public String findShortestWordChain(String begin, String end) {
+    public Result findShortestWordChain(String begin, String end) {
         long start = System.currentTimeMillis();
         logger.info("Searching graph...");
 
         if (begin.length() != end.length())
             return null;
 
-        SortedSet<String> possibleNeighbors = wordsByItsSize.get(begin.length());
+        Set<String> possibleNeighbors = wordsByItsSize.get(begin.length());
 
         if (possibleNeighbors == null)
             return null;
@@ -111,12 +115,10 @@ public class Kata19SolutionImpl implements Kata19Solution {
         Set<Node> visited = new HashSet<>();
         Node endNode = nodes.get(end);
         Node beginNode = nodes.get(begin);
-        beginNode.dist = 0;
+        Map<Node, Node> parentNodes = new HashMap<>();
 
         queue.add(beginNode);
 
-        // String path = begin;
-        Map<Node, Node> parentNodes = new HashMap<>();
         while (!queue.isEmpty()) {
             Node curr = queue.remove(0);
             if (curr == endNode)
@@ -134,6 +136,7 @@ public class Kata19SolutionImpl implements Kata19Solution {
 
 
         logger.info("Done.");
+
         Node node = endNode;
         List<Node> path = new ArrayList<>();
         while (node != null) {
@@ -143,62 +146,8 @@ public class Kata19SolutionImpl implements Kata19Solution {
             node = parentNodes.get(node);
         }
 
-        //  logger.info(System.currentTimeMillis() - start + "");
-        return path.stream()
-                .map(Node::getValue)
-                .reduce((x, y) -> y + "->" + x).get();
+        return new Result(path);
 
-    }
-
-    private void calculateCost(Node begin, Node end) {
-
-    }
-
-    class Node implements Comparable<Node> {
-        String value;
-        int dist = -1;
-        List<Node> neighbors = new ArrayList<>();
-
-        public Node(String value) {
-            this.value = value;
-        }
-
-        public void addNeighbour(Node neighbor) {
-            neighbors.add(neighbor);
-        }
-
-        public List<Node> getNeighbors() {
-            return neighbors;
-        }
-
-        public void setNeighbors(List<Node> neighbors) {
-            this.neighbors = neighbors;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof Node)) return false;
-
-            Node node = (Node) o;
-
-            return value.equals(node.value);
-
-        }
-
-        @Override
-        public int hashCode() {
-            return value.hashCode();
-        }
-
-        @Override
-        public int compareTo(Node o) {
-            return this.value.compareTo(o.value);
-        }
     }
 
 
