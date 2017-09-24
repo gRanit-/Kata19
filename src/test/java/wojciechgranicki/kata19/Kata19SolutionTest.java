@@ -2,13 +2,12 @@ package wojciechgranicki.kata19;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 /**
  * Created by wojciechgranicki on 18.09.2017.
  */
 public class Kata19SolutionTest {
-    Kata19Solution kata19Solution;
+    Kata19Solution kata19Solution = new Kata19SolutionImpl();
+
 
     @Test
     public void loadDictionary() throws Exception {
@@ -16,7 +15,13 @@ public class Kata19SolutionTest {
     }
 
     @Test
-    public void findShortestPath() throws Exception {
+    public void findShortestWordChain() throws Exception {
+
+        kata19Solution.loadDictionary("/wordlist.txt");
+
+        System.out.println(kata19Solution.findShortestWordChain("gold", "lead"));
+        System.out.println(kata19Solution.findShortestWordChain("ruby", "code"));
+        System.out.println(kata19Solution.findShortestWordChain("cat", "dog"));
 
     }
 
