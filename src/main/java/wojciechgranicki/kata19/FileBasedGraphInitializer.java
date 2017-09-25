@@ -18,8 +18,8 @@ import static java.util.Collections.EMPTY_MAP;
 public class FileBasedGraphInitializer implements GraphInitializer {
     private static final Logger logger = Logger.getLogger(FileBasedGraphInitializer.class.getName());
 
-    private Map<Integer, Set<String>> wordsGroupedByLength = new HashMap<>();
-    private Map<String, Node> nodes = new HashMap<>();
+    private Map<Integer, Set<String>> wordsGroupedByLength;
+    private Map<String, Node> nodes;
     private Set<Character> alphabet;
 
 
@@ -30,6 +30,9 @@ public class FileBasedGraphInitializer implements GraphInitializer {
 
     public Map<Integer, Set<String>> loadDictionary(String filePath) throws IOException {
         logger.info("Loading dictionary...");
+        wordsGroupedByLength = new HashMap<>();
+        nodes = new HashMap<>();
+
         InputStream stream = (Kata19SolutionImpl.class.getResourceAsStream(filePath));
         boolean initAlphabet = false;
         if (alphabet.isEmpty())
@@ -71,16 +74,18 @@ public class FileBasedGraphInitializer implements GraphInitializer {
 
     private String readWord(InputStreamReader reader, int currChar, boolean initAlphabet) throws IOException {
         String word = "";
-        while (!Character.isWhitespace(currChar) && currChar != -1) {
-            if (Character.isLetter(currChar) || currChar == '\'') {
-                char c = (char) currChar;
-//                if (!initAlphabet && !alphabet.contains(c))
-//                    return "";
-//                else
-                    alphabet.add(c);
-                word += c;
+        while (Character.isLetter(currChar) || currChar == '\'') {
+            char c = (char) currChar;
+            if (!initAlphabet) {
+                if (!alphabet.contains(c)) {
+                    while (Character.isLetter(currChar) || currChar == '\'') //move to the next word
+                        currChar = reader.read();
+                    return "";
+                }
             } else
-                return "";
+                alphabet.add(c);
+            word += c;
+
             currChar = reader.read();
         }
         return word;
@@ -112,7 +117,6 @@ public class FileBasedGraphInitializer implements GraphInitializer {
             for (Character c : alphabet) // iterate over all possible neighbors
                 for (int i = 0; i < wordLen; i++) {
                     String possibleNeighbor = substituteCharacterAtIndex(word, c, i);
-                    System.out.println(possibleNeighbor);
                     if (sameLengthWords.contains(possibleNeighbor))
                         addNeighbor(node, possibleNeighbor);
                 }

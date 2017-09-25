@@ -58,15 +58,15 @@ public class FileBasedGraphInitializerTest {
 
     @Test
     public void createGraphWithOwnAlphabet() throws IOException {
-        graphInitializer.setAlphabet(Stream.of('c', 'o', 't').collect(Collectors.toSet()));
+        graphInitializer.setAlphabet(Stream.of('c', 'o', 't', 'a').collect(Collectors.toSet()));
         graphInitializer.loadDictionary("/smallWordList.txt");
         Map<String, Node> graph = graphInitializer.createGraph();
-//        assertEquals(2, graph.size());
+        assertEquals(2, graph.size());
 
-        graph.forEach((x,y)->System.out.println(x));
-
-
-
+        graphInitializer.setAlphabet(Stream.of('c', 'o', 't').collect(Collectors.toSet()));
+        graphInitializer.loadDictionary("/smallWordList.txt");
+        graph = graphInitializer.createGraph();
+        assertEquals(1, graph.size());
     }
 
 }

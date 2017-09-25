@@ -1,4 +1,4 @@
-lead
+﻿lead
 load
 goad
 gold
