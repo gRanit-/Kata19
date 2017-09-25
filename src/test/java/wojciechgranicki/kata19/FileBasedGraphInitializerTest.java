@@ -3,8 +3,11 @@ package wojciechgranicki.kata19;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 
@@ -37,7 +40,33 @@ public class FileBasedGraphInitializerTest {
 
     @Test
     public void createGraph() throws Exception {
-        graphInitializer.createGraph();
+        graphInitializer.loadDictionary("/smallWordList.txt");
+        Map<String, Node> graph = graphInitializer.createGraph();
+        assertEquals(17, graph.size());
+        Node cat = graph.get("cat");
+        Node cot = graph.get("cot");
+
+        assertEquals("cat", cat.getValue());
+        assertEquals("cot", cot.getValue());
+        assertEquals("cot", cat.getNeighbors().stream()
+                .findFirst().orElse(new Node(""))
+                .getValue());
+        assertEquals("cat", cot.getNeighbors().stream()
+                .findFirst().orElse(new Node(""))
+                .getValue());
+    }
+
+    @Test
+    public void createGraphWithOwnAlphabet() throws IOException {
+        graphInitializer.setAlphabet(Stream.of('c', 'o', 't').collect(Collectors.toSet()));
+        graphInitializer.loadDictionary("/smallWordList.txt");
+        Map<String, Node> graph = graphInitializer.createGraph();
+//        assertEquals(2, graph.size());
+
+        graph.forEach((x,y)->System.out.println(x));
+
+
+
     }
 
 }

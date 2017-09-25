@@ -1,8 +1,13 @@
 package wojciechgranicki.kata19;
 
 
+import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import static java.util.Collections.EMPTY_MAP;
@@ -12,43 +17,36 @@ import static java.util.Collections.EMPTY_MAP;
  */
 public class FileBasedGraphInitializer implements GraphInitializer {
     private static final Logger logger = Logger.getLogger(FileBasedGraphInitializer.class.getName());
+
     private Map<Integer, Set<String>> wordsGroupedByLength = new HashMap<>();
     private Map<String, Node> nodes = new HashMap<>();
-    private List<Character> alphabet;
+    private Set<Character> alphabet;
 
 
     FileBasedGraphInitializer() {
-        alphabet = new LinkedList<>();
-        for (char i = 'a'; i <= 'z'; i++)
-            alphabet.add(i);
-        for (char i = 'A'; i <= 'Z'; i++)
-            alphabet.add(i);
-        alphabet.add('\'');
+        this.alphabet = new HashSet<>(40);
     }
 
-    public Map<Integer, Set<String>> loadDictionary(String filePath) {
+
+    public Map<Integer, Set<String>> loadDictionary(String filePath) throws IOException {
         logger.info("Loading dictionary...");
         InputStream stream = (Kata19SolutionImpl.class.getResourceAsStream(filePath));
+        boolean initAlphabet = false;
+        if (alphabet.isEmpty())
+            initAlphabet = true;
 
-        try (Scanner scanner = new Scanner(stream)) {
-
-            while (scanner.hasNext()) {
-                String word = scanner.next();
-                Set<String> words = wordsGroupedByLength.get(word.length());
-                if (words == null) {
-                    words = new HashSet<>();
-                    wordsGroupedByLength.put(word.length(), words);
-                }
-                words.add(word);
+        try (InputStreamReader reader = new InputStreamReader(stream, "UTF-8")) {
+            int c;
+            while ((c = reader.read()) != -1) {
+                String word = readWord(reader, c, initAlphabet);
+                if (!word.isEmpty())
+                    addToDictionary(word);
             }
         }
         logger.info("Done.");
         return wordsGroupedByLength;
     }
 
-    public Map<Integer, Set<String>> getWordsGroupedByLength() {
-        return wordsGroupedByLength;
-    }
 
     @Override
     public Map<String, Node> createGraph() {
@@ -66,6 +64,37 @@ public class FileBasedGraphInitializer implements GraphInitializer {
         return nodes;
     }
 
+    public void setAlphabet(Set<Character> alphabet) {
+        this.alphabet = alphabet;
+    }
+
+
+    private String readWord(InputStreamReader reader, int currChar, boolean initAlphabet) throws IOException {
+        String word = "";
+        while (!Character.isWhitespace(currChar) && currChar != -1) {
+            if (Character.isLetter(currChar) || currChar == '\'') {
+                char c = (char) currChar;
+//                if (!initAlphabet && !alphabet.contains(c))
+//                    return "";
+//                else
+                    alphabet.add(c);
+                word += c;
+            } else
+                return "";
+            currChar = reader.read();
+        }
+        return word;
+    }
+
+    private void addToDictionary(String word) {
+        Set<String> words = wordsGroupedByLength.get(word.length());
+        if (words == null) {
+            words = new HashSet<>();
+            wordsGroupedByLength.put(word.length(), words);
+        }
+        words.add(word);
+    }
+
     private Node putIfAbsent(String word) {
         Node node = nodes.get(word);
         if (node == null) {
@@ -80,9 +109,10 @@ public class FileBasedGraphInitializer implements GraphInitializer {
         int allPossibleNeighbors = alphabet.size() * wordLen;
         String word = node.getValue();
         if (sameLengthWords.size() > allPossibleNeighbors)
-            for (Character c : alphabet)
+            for (Character c : alphabet) // iterate over all possible neighbors
                 for (int i = 0; i < wordLen; i++) {
                     String possibleNeighbor = substituteCharacterAtIndex(word, c, i);
+                    System.out.println(possibleNeighbor);
                     if (sameLengthWords.contains(possibleNeighbor))
                         addNeighbor(node, possibleNeighbor);
                 }

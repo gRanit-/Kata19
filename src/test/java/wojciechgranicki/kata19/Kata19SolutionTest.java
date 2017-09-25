@@ -4,8 +4,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.*;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static org.junit.Assert.assertEquals;
@@ -15,10 +13,12 @@ import static wojciechgranicki.kata19.Result.NOT_FOUND;
  * Created by wojciechgranicki on 18.09.2017.
  */
 public class Kata19SolutionTest {
-    Logger logger = Logger.getLogger(Kata19SolutionTest.class.getName());
+    static final Logger logger = Logger.getLogger(Kata19SolutionTest.class.getName());
+
     Kata19Solution kata19Solution;
     FileBasedGraphInitializer fileBasedGraphInitializer;
     List<Chain> chains;
+    private Set<Character> alphabet;
 
     class Chain {
         String begin;
@@ -44,11 +44,15 @@ public class Kata19SolutionTest {
                 new Chain("dog", "cat", 4),
                 new Chain("cat", "dog", 4)
         );
+
+        alphabet = fileBasedGraphInitializer.createEnglishAlphabet();
+
     }
 
     @Test
     public void findShortestWordChainSmallTest() throws Exception {
 
+        fileBasedGraphInitializer.setAlphabet(alphabet);
         fileBasedGraphInitializer.loadDictionary("/smallWordList.txt");
         Map<String, Node> graph = fileBasedGraphInitializer.createGraph();
         checkDistancesAndPaths(graph);
