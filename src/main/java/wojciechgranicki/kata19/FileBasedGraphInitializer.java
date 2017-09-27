@@ -21,7 +21,7 @@ public class FileBasedGraphInitializer extends BasicGraphInitializer {
 
     public Map<Integer, Set<String>> loadDictionary(String filePath) throws IOException {
         logger.info("Loading dictionary...");
-        wordsGroupedByLength = new HashMap<>(); //assignments here assert method reusability
+        wordsGroupedByLength = new HashMap<>(); //assignments here assert method is reusable
         nodes = new HashMap<>();
 
         InputStream stream = (Kata19SolutionImpl.class.getResourceAsStream(filePath));
@@ -32,7 +32,7 @@ public class FileBasedGraphInitializer extends BasicGraphInitializer {
             initAlphabet = true;
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
-        reader.read();// first char is whitespace (at least on Mac)
+        reader.read();// first char is a whitespace (at least on my Mac)
         int i = reader.read();
         while (isNonWhiteSpaceCharacterType(i)) {
             String word = readWord(i, reader, initAlphabet);

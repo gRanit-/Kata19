@@ -27,15 +27,8 @@ public class Result {
         return distance;
     }
 
-    public void setDistance(int distance) {
-        this.distance = distance;
-    }
-
     public List<Node> getPath() {
         return path;
     }
 
-    public void setPath(List<Node> path) {
-        this.path = path;
-    }
 }

@@ -6,7 +6,6 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import static org.junit.Assert.assertEquals;
 import static wojciechgranicki.kata19.Result.NOT_FOUND;
@@ -15,7 +14,6 @@ import static wojciechgranicki.kata19.Result.NOT_FOUND;
  * Created by wojciechgranicki on 18.09.2017.
  */
 public class Kata19SolutionTest {
-    private static final Logger logger = Logger.getLogger(Kata19SolutionTest.class.getName());
     private static final String SMALL_WORD_LIST = "/smallWordList.txt";
     private static final String BIG_WORD_LIST = "/wordlist.txt";
 

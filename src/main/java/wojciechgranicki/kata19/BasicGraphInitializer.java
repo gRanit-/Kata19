@@ -32,19 +32,27 @@ public class BasicGraphInitializer implements GraphInitializer {
         if (words == null)
             throw new IllegalArgumentException("Dictionary can't be null");
         wordsGroupedByLength = new HashMap<>();
-        if (initAlphabet) {
-            for (String w : words) {
-                IntStream.range(0, w.length())
-                        .forEach(i -> alphabet.add(w.charAt(i)));
+        if (initAlphabet)
+            initAlphabetAndAddToDictionary(words);
+        else
+            addToDictionaryIfHasValidChars(words);
+
+    }
+
+    private void initAlphabetAndAddToDictionary(List<String> words) {
+        for (String w : words) {
+            IntStream.range(0, w.length())
+                    .forEach(i -> alphabet.add(w.charAt(i)));
+            addToDictionary(w);
+        }
+    }
+
+    private void addToDictionaryIfHasValidChars(List<String> words) {
+        for (String w : words) {
+            boolean invalid = IntStream.range(0, w.length())
+                    .anyMatch(i -> !alphabet.contains(w.charAt(i)));
+            if (!invalid)
                 addToDictionary(w);
-            }
-        } else {
-            for (String w : words) {
-                boolean invalid = IntStream.range(0, w.length())
-                        .anyMatch(i -> !alphabet.contains(w.charAt(i)));
-                if (!invalid)
-                    addToDictionary(w);
-            }
         }
     }
 

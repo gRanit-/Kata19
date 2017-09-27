@@ -22,16 +22,8 @@ class Node implements Comparable<Node> {
         return neighbors;
     }
 
-    public void setNeighbors(Set<Node> neighbors) {
-        this.neighbors = neighbors;
-    }
-
     public String getValue() {
         return value;
-    }
-
-    public boolean hasNeighbor(Node node) {
-        return neighbors.contains(node);
     }
 
     @Override
