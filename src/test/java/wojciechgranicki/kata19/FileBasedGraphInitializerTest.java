@@ -15,7 +15,8 @@ import static org.junit.Assert.assertEquals;
  * Created by wojciechgranicki on 24.09.2017.
  */
 public class FileBasedGraphInitializerTest {
-    FileBasedGraphInitializer graphInitializer;
+    private FileBasedGraphInitializer graphInitializer;
+    private final String SMALL_WORD_LIST = "/smallWordList.txt";
 
     @Before
     public void setup() {
@@ -24,7 +25,7 @@ public class FileBasedGraphInitializerTest {
 
     @Test
     public void loadDictionary() throws Exception {
-        Map<Integer, Set<String>> wordsBySize = graphInitializer.loadDictionary("/smallWordList.txt");
+        Map<Integer, Set<String>> wordsBySize = graphInitializer.loadDictionary(SMALL_WORD_LIST);
 
         int wordCount = wordsBySize.entrySet().stream()
                 .map(e -> e.getValue().size())
@@ -40,7 +41,7 @@ public class FileBasedGraphInitializerTest {
 
     @Test
     public void createGraph() throws Exception {
-        graphInitializer.loadDictionary("/smallWordList.txt");
+        graphInitializer.loadDictionary(SMALL_WORD_LIST);
         Map<String, Node> graph = graphInitializer.createGraph();
         assertEquals(17, graph.size());
         Node cat = graph.get("cat");
@@ -59,12 +60,12 @@ public class FileBasedGraphInitializerTest {
     @Test
     public void createGraphWithOwnAlphabet() throws IOException {
         graphInitializer.setAlphabet(Stream.of('c', 'o', 't', 'a').collect(Collectors.toSet()));
-        graphInitializer.loadDictionary("/smallWordList.txt");
+        graphInitializer.loadDictionary(SMALL_WORD_LIST);
         Map<String, Node> graph = graphInitializer.createGraph();
         assertEquals(2, graph.size());
 
         graphInitializer.setAlphabet(Stream.of('c', 'o', 't').collect(Collectors.toSet()));
-        graphInitializer.loadDictionary("/smallWordList.txt");
+        graphInitializer.loadDictionary(SMALL_WORD_LIST);
         graph = graphInitializer.createGraph();
         assertEquals(1, graph.size());
     }

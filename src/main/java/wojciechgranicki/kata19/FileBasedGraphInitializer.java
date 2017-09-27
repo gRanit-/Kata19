@@ -1,27 +1,18 @@
 package wojciechgranicki.kata19;
 
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import static java.util.Collections.EMPTY_MAP;
-
 /**
  * Created by wojciechgranicki on 24.09.2017.
  */
-public class FileBasedGraphInitializer implements GraphInitializer {
+public class FileBasedGraphInitializer extends BasicGraphInitializer {
     private static final Logger logger = Logger.getLogger(FileBasedGraphInitializer.class.getName());
-
-    private Map<Integer, Set<String>> wordsGroupedByLength;
-    private Map<String, Node> nodes;
-    private Set<Character> alphabet;
-
 
     FileBasedGraphInitializer() {
         this.alphabet = new HashSet<>(40);
@@ -30,120 +21,56 @@ public class FileBasedGraphInitializer implements GraphInitializer {
 
     public Map<Integer, Set<String>> loadDictionary(String filePath) throws IOException {
         logger.info("Loading dictionary...");
-        wordsGroupedByLength = new HashMap<>();
+        wordsGroupedByLength = new HashMap<>(); //assignments here assert method reusability
         nodes = new HashMap<>();
 
         InputStream stream = (Kata19SolutionImpl.class.getResourceAsStream(filePath));
+
         boolean initAlphabet = false;
+
         if (alphabet.isEmpty())
             initAlphabet = true;
 
-        try (InputStreamReader reader = new InputStreamReader(stream, "UTF-8")) {
-            int c;
-            while ((c = reader.read()) != -1) {
-                String word = readWord(reader, c, initAlphabet);
-                if (!word.isEmpty())
-                    addToDictionary(word);
-            }
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
+        reader.read();// first char is whitespace (at least on Mac)
+        int i = reader.read();
+        while (isNonWhiteSpaceCharacterType(i)) {
+            String word = readWord(i, reader, initAlphabet);
+            if (word != null)
+                addToDictionary(word);
+
+            i = reader.read();
         }
         logger.info("Done.");
         return wordsGroupedByLength;
     }
 
-
-    @Override
-    public Map<String, Node> createGraph() {
-        if (wordsGroupedByLength == null || wordsGroupedByLength.isEmpty())
-            return EMPTY_MAP;
-
-        logger.info("Creating graph...");
-        for (Map.Entry<Integer, Set<String>> neighbors : wordsGroupedByLength.entrySet()) {
-            Set<String> sameLengthWords = neighbors.getValue();
-            for (String word : sameLengthWords)
-                connectNeighbors(putIfAbsent(word), sameLengthWords);
-
-        }
-        logger.info("Done.");
-        return nodes;
-    }
-
-    public void setAlphabet(Set<Character> alphabet) {
-        this.alphabet = alphabet;
-    }
-
-
-    private String readWord(InputStreamReader reader, int currChar, boolean initAlphabet) throws IOException {
-        String word = "";
-        while (Character.isLetter(currChar) || currChar == '\'') {
-            char c = (char) currChar;
-            if (!initAlphabet) {
-                if (!alphabet.contains(c)) {
-                    while (Character.isLetter(currChar) || currChar == '\'') //move to the next word
-                        currChar = reader.read();
-                    return "";
+    private String readWord(int i, BufferedReader reader, boolean initAlphabet) throws IOException {
+        StringBuilder stringBuilder = new StringBuilder();
+        while (isNonWhiteSpaceCharacterType(i)) {
+            char c = (char) i;
+            if (!alphabet.contains(c)) {
+                if (initAlphabet)
+                    alphabet.add(c);
+                else {
+                    moveToTheNextWord(i, reader);
+                    return null;
                 }
-            } else
-                alphabet.add(c);
-            word += c;
+            }
+            stringBuilder.append(c);
+            i = reader.read();
 
-            currChar = reader.read();
         }
-        return word;
+        return stringBuilder.toString();
     }
 
-    private void addToDictionary(String word) {
-        Set<String> words = wordsGroupedByLength.get(word.length());
-        if (words == null) {
-            words = new HashSet<>();
-            wordsGroupedByLength.put(word.length(), words);
-        }
-        words.add(word);
+    private boolean isNonWhiteSpaceCharacterType(int c) {
+        return !(Character.isWhitespace(c) || Character.isSpaceChar(c) || Character.getType(c) == 0 || c == -1);
     }
 
-    private Node putIfAbsent(String word) {
-        Node node = nodes.get(word);
-        if (node == null) {
-            node = new Node(word);
-            nodes.put(word, node);
-        }
-        return node;
+    private void moveToTheNextWord(int i, Reader reader) throws IOException {
+        while (isNonWhiteSpaceCharacterType(i)) i = reader.read();
     }
 
-    private void connectNeighbors(Node node, Set<String> sameLengthWords) {
-        int wordLen = node.getValue().length();
-        int allPossibleNeighbors = alphabet.size() * wordLen;
-        String word = node.getValue();
-        if (sameLengthWords.size() > allPossibleNeighbors)
-            for (Character c : alphabet) // iterate over all possible neighbors
-                for (int i = 0; i < wordLen; i++) {
-                    String possibleNeighbor = substituteCharacterAtIndex(word, c, i);
-                    if (sameLengthWords.contains(possibleNeighbor))
-                        addNeighbor(node, possibleNeighbor);
-                }
-        else
-            sameLengthWords.stream()
-                    .filter(possibleNeighbor -> areNeighbors(word, possibleNeighbor))
-                    .forEach(possibleNeighbor -> addNeighbor(node, possibleNeighbor));
-    }
 
-    private String substituteCharacterAtIndex(String word, Character c, int i) {
-        return word.substring(0, i) + c + word.substring(i + 1, word.length());
-    }
-
-    private void addNeighbor(Node node, String neighborWord) {
-        Node neighbor = putIfAbsent(neighborWord);
-        node.addNeighbour(neighbor);
-
-    }
-
-    private boolean areNeighbors(String a, String b) {
-        int count = 0;
-        for (int i = 0; i < a.length(); i++) {
-            if (a.charAt(i) != b.charAt(i))
-                count++;
-            if (count > 1)
-                return false;
-        }
-        return count == 1;
-    }
 }

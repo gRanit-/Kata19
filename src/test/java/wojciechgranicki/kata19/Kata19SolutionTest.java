@@ -3,7 +3,9 @@ package wojciechgranicki.kata19;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import static org.junit.Assert.assertEquals;
@@ -13,12 +15,13 @@ import static wojciechgranicki.kata19.Result.NOT_FOUND;
  * Created by wojciechgranicki on 18.09.2017.
  */
 public class Kata19SolutionTest {
-    static final Logger logger = Logger.getLogger(Kata19SolutionTest.class.getName());
+    private static final Logger logger = Logger.getLogger(Kata19SolutionTest.class.getName());
+    private static final String SMALL_WORD_LIST = "/smallWordList.txt";
+    private static final String BIG_WORD_LIST = "/wordlist.txt";
 
-    Kata19Solution kata19Solution;
-    FileBasedGraphInitializer fileBasedGraphInitializer;
-    List<Chain> chains;
-    private Set<Character> alphabet;
+    private Kata19Solution kata19Solution;
+    private FileBasedGraphInitializer fileBasedGraphInitializer;
+    private List<Chain> chains;
 
     class Chain {
         String begin;
@@ -45,22 +48,19 @@ public class Kata19SolutionTest {
                 new Chain("cat", "dog", 4)
         );
 
-        alphabet = fileBasedGraphInitializer.createEnglishAlphabet();
 
     }
 
     @Test
     public void findShortestWordChainSmallTest() throws Exception {
-
-        fileBasedGraphInitializer.setAlphabet(alphabet);
-        fileBasedGraphInitializer.loadDictionary("/smallWordList.txt");
+        fileBasedGraphInitializer.loadDictionary(SMALL_WORD_LIST);
         Map<String, Node> graph = fileBasedGraphInitializer.createGraph();
         checkDistancesAndPaths(graph);
     }
 
     @Test
     public void findShortestWordChainBigTest() throws Exception {
-        fileBasedGraphInitializer.loadDictionary("/wordlist.txt");
+        fileBasedGraphInitializer.loadDictionary(BIG_WORD_LIST);
         Map<String, Node> graph = fileBasedGraphInitializer.createGraph();
         checkDistancesAndPaths(graph);
     }
@@ -73,17 +73,13 @@ public class Kata19SolutionTest {
 
     @Test
     public void chainDoesntExist() {
-        Map<String, Node> nodes = new HashMap<>();
-        Map<Integer, Set<String>> wordsBySize = new HashMap<>();
         Node n1 = new Node("TEST");
         Node n2 = new Node("KESB");
         Node n3 = new Node("BEST");
         n1.addNeighbour(n3);
         n2.addNeighbour(n1);
         n3.addNeighbour(n1);
-        nodes.put("TEST", n1);
-        nodes.put("KESB", n2);
-        nodes.put("BEST", n3);
+
 
         Result r1 = kata19Solution.findShortestWordChain(n1, n2);
         assertEquals(NOT_FOUND, r1);
