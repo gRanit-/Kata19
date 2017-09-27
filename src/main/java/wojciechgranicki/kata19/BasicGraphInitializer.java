@@ -28,11 +28,23 @@ public class BasicGraphInitializer implements GraphInitializer {
         return nodes;
     }
 
-    public void loadDictionary(List<String> words, boolean initAlphabet) {
+    @Override
+    public void setAlphabet(Set<Character> alphabet) {
+        if (alphabet == null)
+            throw new IllegalArgumentException("Alphabet can't be null");
+        boolean whitechar = alphabet.stream()
+                .anyMatch(c -> Character.isSpaceChar(c) || Character.isWhitespace(c));
+        if (whitechar)
+            throw new IllegalArgumentException("Alphabet can't contain white characters!");
+
+        this.alphabet = alphabet;
+    }
+
+    public void loadDictionary(List<String> words) {
         if (words == null)
             throw new IllegalArgumentException("Dictionary can't be null");
         wordsGroupedByLength = new HashMap<>();
-        if (initAlphabet)
+        if (alphabet.isEmpty())
             initAlphabetAndAddToDictionary(words);
         else
             addToDictionaryIfHasValidChars(words);
@@ -102,12 +114,6 @@ public class BasicGraphInitializer implements GraphInitializer {
         return nodes.computeIfAbsent(word, Node::new);
     }
 
-
-    public void setAlphabet(Set<Character> alphabet) {
-        if (alphabet == null)
-            throw new IllegalArgumentException("Alphabet can't be null");
-        this.alphabet = alphabet;
-    }
 
     public void setDictionary(Map<Integer, Set<String>> wordsGroupedByLength) {
         if (wordsGroupedByLength == null)
