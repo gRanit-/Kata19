@@ -5,8 +5,9 @@ http://codekata.com/kata/kata19-word-chains/
 Manual:
 
 1. Use GraphInitializer implementations to initialize graph
-  1. Load dictionary from List with loadDictionary method in BasicGraphInitalizer
-  2. Load dictionary from file with loadDictionary method in FileBasedGraphInitializer
+  Load dictionary from List with loadDictionary method in BasicGraphInitalizer
+                                  OR
+  Load dictionary from file with loadDictionary method in FileBasedGraphInitializer
   
   All implementations require alphabet to work. You can set up your own with setAlphabet(Set<Character>) 
   or don't and initializer will do this for you!
